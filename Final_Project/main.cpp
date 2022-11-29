@@ -17,7 +17,8 @@ void timeout(int i, char * text) {
 
 // Mouse callback 함수에서 사용되는 전역 변수 선언
 Point pt;		
-Mat maskImg;	
+Mat maskImg;
+Mat saved;
 
 void on_mouse(int event, int x, int y, int flags, void* userdata);
 
@@ -35,8 +36,12 @@ int main()
 	char put_time[2];		// 영상에 출력할 string
 	Mat ready = imread("../../../media/ready.png");
 	Mat login = imread("../../../media/login.png");
+	Mat mouse = imread("../../../media/mouse_event.png");
+	saved = imread("../../../media/save.png");
 	resize(ready, ready, Size(640, 480));
 	resize(login, login, Size(640, 480));
+	resize(mouse, mouse, Size(640, 480));
+	resize(saved, saved, Size(640, 480));
 
 	int enroll = 1;				// 1 : 현재 등록해야 함
 	float score, th = 120;		// 본인 인증 기준
@@ -150,7 +155,7 @@ int main()
 	int show_result_flag = 0;
 
 	int m_spcount = 100;		// number of superpixels
-	int m_compactness = 20;		// compactness factor (1-40)
+	int m_compactness = 10;		// compactness factor (1-40)
 	int slic_flag = 0;
 	int init_set = 1;
 	Mat slic;
@@ -168,6 +173,7 @@ int main()
 			// Mask 이미지 만들기
 			// 매 frame마다 키보드 입력을 받을 수 있기 때문에 원할때 마스크 이미지 변경 가능
 			if (keycode == 's' || keycode == 'S') {
+				imshow("Camera", mouse);
 				imwrite("./images/original.jpg", Image);		// Graph cut하고 싶은 이미지 저장
 				maskImg = imread("./images/original.jpg");		// 저장한 이미지 불러오기
 
@@ -211,7 +217,7 @@ int main()
 					createTrackbar("# of Superpixel", "SLIC segmentation", 0, 400, superpixel_num_change, (void*)&m_spcount);
 					createTrackbar("Compactness", "SLIC segmentation", 0, 40, compactness_change, (void*)&m_compactness);
 					setTrackbarPos("# of Superpixel", "SLIC segmentation", 100);
-					setTrackbarPos("Compactness", "SLIC segmentation", 20);
+					setTrackbarPos("Compactness", "SLIC segmentation", 10);
 					init_set = 0;
 				}				
 				SLICsegmentation(slic, m_spcount, m_compactness);		// 현재 영상에 대해서 SLIC 진행
@@ -270,8 +276,9 @@ void on_mouse(int event, int x, int y, int flags, void* userdata) {
 		}
 		break;
 	case EVENT_MBUTTONDOWN:
-		printf("\n=============== Save Mask Image ===============\n");
+		printf("\n===============  Save Mask Image  ===============\n");
 		imwrite("./images/maskImg.bmp", maskImg);
+		imshow("Camera", saved);
 		break;
 	default:
 		break;
